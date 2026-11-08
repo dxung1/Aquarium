@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -427,8 +428,6 @@ to { opacity: 0; transform: translateY(-60px) scale(1.15); }
 <option value="플라캇 베타">🐠 플라캇 베타</option>
 <option value="새우">🦐 관상용 새우</option>
 <option value="달팽이">🐌 관상용 달팽이</option>
-
-<!-- 새로 추가된 물고기 -->
 <option value="블롭피쉬">🐡 블롭피쉬</option>
 <option value="블루탱">🐠 블루탱</option>
 <option value="씨몽키">🦐 씨몽키</option>
@@ -506,7 +505,6 @@ const speciesData = {
 "금붕어":"🐠", "플래티":"🐟", "몰리":"🐟",
 "구라미":"🐠", "라미레지":"🐠", "체리바브":"🐟",
 "플라캇 베타":"🐠", "새우":"🦐", "달팽이":"🐌",
-
 "블롭피쉬":"🐡",
 "블루탱":"🐠",
 "씨몽키":"🦐",
@@ -795,10 +793,16 @@ effect("💗");
 startIndividualRoaming(f);
 }
 
+/* 수정된 물고기 선택 함수 */
 function selectFish(id) {
 playClickSound();
+
 selectedId = id;
-render();
+
+/* 어항 속 물고기들은 그대로 두고
+   목록과 돌보기 화면만 갱신해 */
+renderList();
+renderCare();
 
 const f = selectedFish();
 if (f) say(f.name + "를 선택했어! 🐠");
