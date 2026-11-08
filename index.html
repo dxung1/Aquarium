@@ -226,20 +226,24 @@ text-shadow: 0 1px 3px #ffffffb0;
 pointer-events: none;
 }
 
-/* 사진이 이모티콘 대신 표시돼 */
+/* 얼굴 부분에만 사진을 겹쳐 표시 */
 .fish-face-photo {
 position: absolute;
-left: 50%;
-top: 5px;
-transform: translateX(-50%);
-width: 30px;
-height: 30px;
+left: 14px;
+top: 8px;
+width: 19px;
+height: 19px;
 border-radius: 50%;
 object-fit: cover;
-border: none;
-box-shadow: none;
-z-index: 2;
+border: 1px solid white;
+box-shadow: 0 1px 3px #0002;
+z-index: 3;
 pointer-events: none;
+}
+
+/* 물고기가 오른쪽을 볼 때 사진도 오른쪽으로 이동 */
+.swimmer.facing-right .fish-face-photo {
+left: 32px;
 }
 
 @keyframes wiggle {
@@ -522,7 +526,6 @@ to { opacity: 0; transform: translateY(-60px) scale(1.15); }
 </div>
 
 <script>
-
 const MAX_FISH = 20;
 const SAVE_KEY = "mongleAquarium10";
 
@@ -772,26 +775,24 @@ async function uploadFishPhoto(event) {
   input.value = "";
 }
 
-/* 사진이 있으면 이모티콘을 숨기고 사진만 표시 */
+/* 이모티콘은 유지하고 사진만 추가 */
 function updateFishFace(f) {
   const swimmer = document.querySelector('[data-fish-id="'+f.id+'"]');
   if (!swimmer) return;
 
-  const emoji = swimmer.querySelector(".fish-emoji");
   const oldPhoto = swimmer.querySelector(".fish-face-photo");
-
   if (oldPhoto) oldPhoto.remove();
 
   if (f.photo) {
-    if (emoji) emoji.style.display = "none";
-
     const img = document.createElement("img");
     img.className = "fish-face-photo";
     img.src = f.photo;
     img.alt = f.name+"의 얼굴 사진";
-    swimmer.insertBefore(img,swimmer.querySelector(".swim-name"));
-  } else {
-    if (emoji) emoji.style.display = "block";
+
+    swimmer.insertBefore(
+      img,
+      swimmer.querySelector(".swim-name")
+    );
   }
 }
 
@@ -959,8 +960,13 @@ function moveFish(f,x,y,durationSec=8) {
   const emojiEl = el.querySelector(".fish-emoji");
 
   if (emojiEl) {
-    if (f.x>f.lastX+1) emojiEl.style.transform = "scaleX(-1)";
-    else if (f.x<f.lastX-1) emojiEl.style.transform = "scaleX(1)";
+    if (f.x>f.lastX+1) {
+      emojiEl.style.transform = "scaleX(-1)";
+      el.classList.add("facing-right");
+    } else if (f.x<f.lastX-1) {
+      emojiEl.style.transform = "scaleX(1)";
+      el.classList.remove("facing-right");
+    }
   }
 
   el.style.transition = `left ${durationSec}s ease-in-out, top ${durationSec}s ease-in-out`;
@@ -1335,15 +1341,15 @@ function renderTankFish() {
     name.className = "swim-name";
     name.textContent = f.name;
 
-    /* 사진이 있으면 이모티콘을 만들지 않고 사진만 표시 */
+    /* 이모티콘은 항상 표시하고 사진은 얼굴 위에 겹치기 */
+    item.appendChild(emoji);
+
     if (f.photo) {
       const photo = document.createElement("img");
       photo.className = "fish-face-photo";
       photo.src = f.photo;
       photo.alt = f.name+"의 얼굴 사진";
       item.appendChild(photo);
-    } else {
-      item.appendChild(emoji);
     }
 
     item.appendChild(name);
