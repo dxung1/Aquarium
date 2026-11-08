@@ -226,14 +226,14 @@ text-shadow: 0 1px 3px #ffffffb0;
 pointer-events: none;
 }
 
-/* 물고기 얼굴 사진 - 테두리와 그림자 제거 */
+/* 사진이 이모티콘 대신 표시돼 */
 .fish-face-photo {
 position: absolute;
 left: 50%;
 top: 5px;
 transform: translateX(-50%);
-width: 23px;
-height: 23px;
+width: 30px;
+height: 30px;
 border-radius: 50%;
 object-fit: cover;
 border: none;
@@ -247,7 +247,6 @@ from { transform: rotate(-5deg) scale(.98); }
 to { transform: rotate(5deg) scale(1.02); }
 }
 
-/* 광어 특별 점프 */
 .swimmer.flatfish-jump .fish-emoji {
 animation: flatfishJump 1.2s ease-in-out;
 }
@@ -483,25 +482,12 @@ to { opacity: 0; transform: translateY(-60px) scale(1.15); }
 <div class="message" style="margin-top:12px;">
 <strong>📷 나만의 얼굴 사진</strong>
 <p class="small">원하는 사진을 골라 친구의 얼굴에 넣어 줘!</p>
-
-<button class="blue" style="width:100%;"
-onclick="document.getElementById('fishPhotoInput').click()">
+<button class="blue" style="width:100%;" onclick="document.getElementById('fishPhotoInput').click()">
 📷 사진 업로드하기
 </button>
-
-<input
-type="file"
-id="fishPhotoInput"
-accept="image/jpeg,image/png,image/webp,image/*"
-hidden
-onchange="uploadFishPhoto(event)"
->
-
+<input type="file" id="fishPhotoInput" accept="image/jpeg,image/png,image/webp,image/*" hidden onchange="uploadFishPhoto(event)">
 <p id="photoStatus" class="small">아직 등록된 사진이 없어!</p>
-
-<button class="danger" style="width:100%;" onclick="removeFishPhoto()">
-사진 삭제하기
-</button>
+<button class="danger" style="width:100%;" onclick="removeFishPhoto()">사진 삭제하기</button>
 </div>
 
 <div class="actions">
@@ -536,6 +522,7 @@ onchange="uploadFishPhoto(event)"
 </div>
 
 <script>
+
 const MAX_FISH = 20;
 const SAVE_KEY = "mongleAquarium10";
 
@@ -570,14 +557,14 @@ let nextNoteTime = 0;
 let bgmStep = 0;
 
 const bgmSequence = [
-{ note:261.63, bass:130.81 }, { note:329.63 }, { note:392.00 }, { note:493.88 },
-{ note:523.25 }, { note:392.00 }, { note:329.63 }, { note:493.88 },
-{ note:220.00, bass:110.00 }, { note:261.63 }, { note:329.63 }, { note:392.00 },
-{ note:440.00 }, { note:329.63 }, { note:261.63 }, { note:392.00 },
-{ note:174.61, bass:87.31 }, { note:220.00 }, { note:261.63 }, { note:329.63 },
-{ note:349.23 }, { note:261.63 }, { note:220.00 }, { note:329.63 },
-{ note:196.00, bass:98.00 }, { note:261.63 }, { note:293.66 }, { note:349.23 },
-{ note:392.00 }, { note:293.66 }, { note:261.63 }, { note:349.23 }
+{note:261.63,bass:130.81},{note:329.63},{note:392.00},{note:493.88},
+{note:523.25},{note:392.00},{note:329.63},{note:493.88},
+{note:220.00,bass:110.00},{note:261.63},{note:329.63},{note:392.00},
+{note:440.00},{note:329.63},{note:261.63},{note:392.00},
+{note:174.61,bass:87.31},{note:220.00},{note:261.63},{note:329.63},
+{note:349.23},{note:261.63},{note:220.00},{note:329.63},
+{note:196.00,bass:98.00},{note:261.63},{note:293.66},{note:349.23},
+{note:392.00},{note:293.66},{note:261.63},{note:349.23}
 ];
 
 function initAudio() {
@@ -587,41 +574,36 @@ function initAudio() {
   if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
-function scheduleSineNote(freq, time, duration = 2.2, vol = 0.18, isBass = false) {
+function scheduleSineNote(freq,time,duration=2.2,vol=0.18,isBass=false) {
   if (!audioCtx) return;
-
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
 
   osc.type = "sine";
-  osc.frequency.setValueAtTime(freq, time);
+  osc.frequency.setValueAtTime(freq,time);
 
   const finalVol = masterVolume * vol;
-  gain.gain.setValueAtTime(0, time);
-  gain.gain.linearRampToValueAtTime(finalVol, time + (isBass ? 0.15 : 0.06));
-  gain.gain.exponentialRampToValueAtTime(0.00001, time + duration);
+  gain.gain.setValueAtTime(0,time);
+  gain.gain.linearRampToValueAtTime(finalVol,time+(isBass?0.15:0.06));
+  gain.gain.exponentialRampToValueAtTime(0.00001,time+duration);
 
   osc.connect(gain);
   gain.connect(audioCtx.destination);
   osc.start(time);
-  osc.stop(time + duration);
+  osc.stop(time+duration);
 }
 
 function scheduler() {
-  while (nextNoteTime < audioCtx.currentTime + 0.3) {
-    const stepData = bgmSequence[bgmStep % bgmSequence.length];
-
-    scheduleSineNote(stepData.note, nextNoteTime, 2.2, 0.18);
-
+  while (nextNoteTime < audioCtx.currentTime+0.3) {
+    const stepData = bgmSequence[bgmStep%bgmSequence.length];
+    scheduleSineNote(stepData.note,nextNoteTime,2.2,0.18);
     if (stepData.bass) {
-      scheduleSineNote(stepData.bass, nextNoteTime, 3.5, 0.22, true);
+      scheduleSineNote(stepData.bass,nextNoteTime,3.5,0.22,true);
     }
-
     nextNoteTime += 0.55;
     bgmStep++;
   }
-
-  if (isBgmOn) bgmTimerId = setTimeout(scheduler, 40);
+  if (isBgmOn) bgmTimerId = setTimeout(scheduler,40);
 }
 
 function toggleBGM() {
@@ -632,7 +614,7 @@ function toggleBGM() {
   if (isBgmOn) {
     btn.textContent = "🎵 BGM 끄기";
     btn.style.background = "#d9f2f8";
-    nextNoteTime = audioCtx.currentTime + 0.05;
+    nextNoteTime = audioCtx.currentTime+0.05;
     scheduler();
     playClickSound();
   } else {
@@ -642,7 +624,7 @@ function toggleBGM() {
   }
 }
 
-function playToneImmediate(freq, type, duration, volMultiplier = 0.5) {
+function playToneImmediate(freq,type,duration,volMultiplier=0.5) {
   try {
     initAudio();
     if (!audioCtx) return;
@@ -652,48 +634,47 @@ function playToneImmediate(freq, type, duration, volMultiplier = 0.5) {
     const now = audioCtx.currentTime;
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.setValueAtTime(freq,now);
 
-    const vol = masterVolume * volMultiplier;
-    gain.gain.setValueAtTime(vol, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    gain.gain.setValueAtTime(masterVolume*volMultiplier,now);
+    gain.gain.exponentialRampToValueAtTime(0.0001,now+duration);
 
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start(now);
-    osc.stop(now + duration);
+    osc.stop(now+duration);
   } catch(e) {}
 }
 
 function playBubbleSound() {
-  playToneImmediate(440, "sine", 0.2, 0.4);
-  setTimeout(() => playToneImmediate(659.25, "sine", 0.25, 0.3), 70);
+  playToneImmediate(440,"sine",0.2,0.4);
+  setTimeout(()=>playToneImmediate(659.25,"sine",0.25,0.3),70);
 }
 
 function playClickSound() {
-  playToneImmediate(523.25, "sine", 0.12, 0.4);
+  playToneImmediate(523.25,"sine",0.12,0.4);
 }
 
 function playHeartSound() {
-  playToneImmediate(587.33, "sine", 0.25, 0.4);
-  setTimeout(() => playToneImmediate(880, "sine", 0.35, 0.3), 90);
+  playToneImmediate(587.33,"sine",0.25,0.4);
+  setTimeout(()=>playToneImmediate(880,"sine",0.35,0.3),90);
 }
 
 function playCleanSound() {
-  [329.63, 440, 523.25, 659.25].forEach((f, i) => {
-    setTimeout(() => playToneImmediate(f, "sine", 0.3, 0.35), i * 90);
+  [329.63,440,523.25,659.25].forEach((f,i)=>{
+    setTimeout(()=>playToneImmediate(f,"sine",0.3,0.35),i*90);
   });
 }
 
 function changeVolume(val) {
-  masterVolume = Math.max(0, Math.min(1, parseFloat(val) || 0));
+  masterVolume = Math.max(0,Math.min(1,parseFloat(val)||0));
   saveGame();
 }
 
 const $ = id => document.getElementById(id);
 
 function selectedFish() {
-  return fish.find(f => f.id === selectedId) || null;
+  return fish.find(f=>f.id===selectedId)||null;
 }
 
 function say(text) {
@@ -703,56 +684,45 @@ function say(text) {
 
 function saveGame() {
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({
-      fish,
-      selectedId,
-      nextId,
-      decorations,
-      waterClean,
-      pollutionLevel,
-      masterVolume
+    localStorage.setItem(SAVE_KEY,JSON.stringify({
+      fish,selectedId,nextId,decorations,
+      waterClean,pollutionLevel,masterVolume
     }));
-  } catch (e) {
-    console.warn("수족관 저장에 실패했어.", e);
+  } catch(e) {
+    console.warn("수족관 저장에 실패했어.",e);
   }
 }
 
 /* 사진 용량 줄이기 */
 function compressFishPhoto(file) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve,reject)=>{
     const image = new Image();
     const imageUrl = URL.createObjectURL(file);
 
-    image.onload = () => {
+    image.onload = ()=>{
       try {
         const canvas = document.createElement("canvas");
         const maxSize = 180;
+        const ratio = Math.min(1,maxSize/Math.max(image.width,image.height));
 
-        const ratio = Math.min(
-          1,
-          maxSize / Math.max(image.width, image.height)
-        );
-
-        canvas.width = Math.max(1, Math.round(image.width * ratio));
-        canvas.height = Math.max(1, Math.round(image.height * ratio));
+        canvas.width = Math.max(1,Math.round(image.width*ratio));
+        canvas.height = Math.max(1,Math.round(image.height*ratio));
 
         const ctx = canvas.getContext("2d");
-
         if (!ctx) throw new Error("사진 변환 실패");
 
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-        const result = canvas.toDataURL("image/jpeg", 0.7);
+        ctx.drawImage(image,0,0,canvas.width,canvas.height);
+        const result = canvas.toDataURL("image/jpeg",0.7);
 
         URL.revokeObjectURL(imageUrl);
         resolve(result);
-      } catch (error) {
+      } catch(error) {
         URL.revokeObjectURL(imageUrl);
         reject(error);
       }
     };
 
-    image.onerror = () => {
+    image.onerror = ()=>{
       URL.revokeObjectURL(imageUrl);
       reject(new Error("사진을 읽을 수 없어."));
     };
@@ -785,49 +755,44 @@ async function uploadFishPhoto(event) {
   say("사진을 준비하고 있어!");
 
   try {
-    const photo = await compressFishPhoto(file);
-
-    f.photo = photo;
+    f.photo = await compressFishPhoto(file);
 
     updateFishFace(f);
     renderCare();
     saveGame();
 
-    say(f.name + "의 얼굴 사진을 등록했어! 💗");
+    say(f.name+"의 얼굴 사진을 등록했어! 💗");
     effect("💗");
-
-  } catch (error) {
-    console.error("사진 업로드 오류:", error);
-
-    $("photoStatus").textContent =
-      "사진을 불러오지 못했어. JPG나 PNG로 다시 시도해 줘!";
-
+  } catch(error) {
+    console.error("사진 업로드 오류:",error);
+    $("photoStatus").textContent = "사진을 불러오지 못했어. JPG나 PNG로 다시 시도해 줘!";
     say("사진을 불러오지 못했어. 다른 사진으로 시도해 줘!");
   }
 
   input.value = "";
 }
 
-/* 어항 속 사진 갱신 */
+/* 사진이 있으면 이모티콘을 숨기고 사진만 표시 */
 function updateFishFace(f) {
-  const swimmer = document.querySelector(
-    '[data-fish-id="' + f.id + '"]'
-  );
-
+  const swimmer = document.querySelector('[data-fish-id="'+f.id+'"]');
   if (!swimmer) return;
 
+  const emoji = swimmer.querySelector(".fish-emoji");
   const oldPhoto = swimmer.querySelector(".fish-face-photo");
 
   if (oldPhoto) oldPhoto.remove();
 
-  if (!f.photo) return;
+  if (f.photo) {
+    if (emoji) emoji.style.display = "none";
 
-  const img = document.createElement("img");
-  img.className = "fish-face-photo";
-  img.src = f.photo;
-  img.alt = f.name + "의 얼굴 사진";
-
-  swimmer.appendChild(img);
+    const img = document.createElement("img");
+    img.className = "fish-face-photo";
+    img.src = f.photo;
+    img.alt = f.name+"의 얼굴 사진";
+    swimmer.insertBefore(img,swimmer.querySelector(".swim-name"));
+  } else {
+    if (emoji) emoji.style.display = "block";
+  }
 }
 
 /* 사진 삭제 */
@@ -845,80 +810,52 @@ function removeFishPhoto() {
   }
 
   delete f.photo;
-
   updateFishFace(f);
   renderCare();
   saveGame();
-
-  say(f.name + "의 사진을 삭제했어!");
+  say(f.name+"의 사진을 삭제했어!");
 }
 
 function loadGame() {
   try {
-    const saved = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
+    const saved = JSON.parse(localStorage.getItem(SAVE_KEY)||"null");
+    if (!saved||!Array.isArray(saved.fish)) return;
 
-    if (!saved || !Array.isArray(saved.fish)) return;
+    fish = saved.fish.filter(f=>
+      f&&Number.isFinite(f.id)&&
+      typeof f.name==="string"&&speciesData[f.species]
+    ).slice(0,MAX_FISH);
 
-    fish = saved.fish
-      .filter(f =>
-        f &&
-        Number.isFinite(f.id) &&
-        typeof f.name === "string" &&
-        speciesData[f.species]
-      )
-      .slice(0, MAX_FISH);
-
-    fish.forEach(f => {
+    fish.forEach(f=>{
       f.emoji = speciesData[f.species];
-
-      f.fullness = Math.max(
-        0,
-        Math.min(100, Number(f.fullness) || 0)
-      );
-
-      f.mood = typeof f.mood === "string"
-        ? f.mood
-        : "기분이 좋아요! 💗";
-
-      f.x = Number.isFinite(f.x)
-        ? f.x
-        : 10 + Math.random() * 60;
-
-      f.y = Number.isFinite(f.y)
-        ? f.y
-        : 15 + Math.random() * 120;
-
-      f.lastX = Number.isFinite(f.lastX) ? f.lastX : f.x;
+      f.fullness = Math.max(0,Math.min(100,Number(f.fullness)||0));
+      f.mood = typeof f.mood==="string"?f.mood:"기분이 좋아요! 💗";
+      f.x = Number.isFinite(f.x)?f.x:10+Math.random()*60;
+      f.y = Number.isFinite(f.y)?f.y:15+Math.random()*120;
+      f.lastX = Number.isFinite(f.lastX)?f.lastX:f.x;
     });
 
     selectedId = saved.selectedId;
-    nextId = Number.isInteger(saved.nextId) ? saved.nextId : 1;
+    nextId = Number.isInteger(saved.nextId)?saved.nextId:1;
 
     decorations = Array.isArray(saved.decorations)
-      ? saved.decorations
-          .filter(x => typeof x === "string")
-          .slice(0, 30)
-      : ["🌿", "🪨", "🌿"];
+      ? saved.decorations.filter(x=>typeof x==="string").slice(0,30)
+      : ["🌿","🪨","🌿"];
 
-    pollutionLevel = Math.max(
-      0,
-      Math.min(100, Number(saved.pollutionLevel) || 0)
-    );
-
-    waterClean = saved.waterClean !== false;
+    pollutionLevel = Math.max(0,Math.min(100,Number(saved.pollutionLevel)||0));
+    waterClean = saved.waterClean!==false;
 
     if (Number.isFinite(saved.masterVolume)) {
-      masterVolume = Math.max(0, Math.min(1, saved.masterVolume));
+      masterVolume = Math.max(0,Math.min(1,saved.masterVolume));
     }
 
     $("volRange").value = masterVolume;
 
-    if (!fish.some(f => f.id === selectedId)) {
-      selectedId = fish.length ? fish[0].id : null;
+    if (!fish.some(f=>f.id===selectedId)) {
+      selectedId = fish.length?fish[0].id:null;
     }
-
-  } catch (e) {
-    console.warn("저장된 수족관을 불러오지 못했어.", e);
+  } catch(e) {
+    console.warn("저장된 수족관을 불러오지 못했어.",e);
     fish = [];
   }
 }
@@ -926,7 +863,7 @@ function loadGame() {
 function addFish() {
   playClickSound();
 
-  if (fish.length >= MAX_FISH) {
+  if (fish.length>=MAX_FISH) {
     say("어항이 가득 찼어! 최대 20마리까지 키울 수 있어.");
     return;
   }
@@ -941,15 +878,13 @@ function addFish() {
   }
 
   const f = {
-    id: nextId++,
-    name,
-    species,
-    emoji: speciesData[species],
-    fullness: 55,
-    mood: "새로운 집이 마음에 들어요! 💗",
-    x: 10 + Math.random() * 60,
-    y: 15 + Math.random() * 120,
-    lastX: 10
+    id:nextId++,name,species,
+    emoji:speciesData[species],
+    fullness:55,
+    mood:"새로운 집이 마음에 들어요! 💗",
+    x:10+Math.random()*60,
+    y:15+Math.random()*120,
+    lastX:10
   };
 
   fish.push(f);
@@ -958,23 +893,19 @@ function addFish() {
 
   render();
   saveGame();
-
-  say(name + "가 어항에 왔어! 어서 와! 🫧");
+  say(name+"가 어항에 왔어! 어서 와! 🫧");
   effect("💗");
   startIndividualRoaming(f);
 }
 
 function selectFish(id) {
   playClickSound();
-
   selectedId = id;
-
   renderList();
   renderCare();
 
   const f = selectedFish();
-  if (f) say(f.name + "를 선택했어! 🐠");
-
+  if (f) say(f.name+"를 선택했어! 🐠");
   saveGame();
 }
 
@@ -983,14 +914,14 @@ function removeFish() {
   const f = selectedFish();
   if (!f) return;
 
-  if (!confirm(f.name + "를 수족관에서 삭제할까?")) return;
+  if (!confirm(f.name+"를 수족관에서 삭제할까?")) return;
 
-  fish = fish.filter(item => item.id !== f.id);
-  selectedId = fish.length ? fish[0].id : null;
+  fish = fish.filter(item=>item.id!==f.id);
+  selectedId = fish.length?fish[0].id:null;
 
   render();
   saveGame();
-  say(f.name + "를 목록에서 삭제했어.");
+  say(f.name+"를 목록에서 삭제했어.");
 }
 
 function renameFish() {
@@ -998,76 +929,69 @@ function renameFish() {
   const f = selectedFish();
   if (!f) return;
 
-  const value = prompt("새로운 이름을 지어 줘!", f.name);
-  if (value === null) return;
+  const value = prompt("새로운 이름을 지어 줘!",f.name);
+  if (value===null) return;
 
   const name = value.trim();
-
   if (!name) {
     say("이름을 비워 둘 수 없어!");
     return;
   }
 
-  f.name = name.slice(0, 16);
+  f.name = name.slice(0,16);
   render();
   saveGame();
-  say("새 이름은 " + f.name + "! 💗");
+  say("새 이름은 "+f.name+"! 💗");
 }
 
-function moveFish(f, x, y, durationSec = 8) {
-  const el = document.querySelector('[data-fish-id="' + f.id + '"]');
+function moveFish(f,x,y,durationSec=8) {
+  const el = document.querySelector('[data-fish-id="'+f.id+'"]');
   if (!el) return;
 
   const area = $("tankFish");
-  const maxX = Math.max(0, area.clientWidth - 65);
-  const maxY = Math.max(0, area.clientHeight - 48);
+  const maxX = Math.max(0,area.clientWidth-65);
+  const maxY = Math.max(0,area.clientHeight-48);
 
   f.lastX = f.x;
-  f.x = Math.max(0, Math.min(maxX, x));
-  f.y = Math.max(0, Math.min(maxY, y));
+  f.x = Math.max(0,Math.min(maxX,x));
+  f.y = Math.max(0,Math.min(maxY,y));
 
   const emojiEl = el.querySelector(".fish-emoji");
 
   if (emojiEl) {
-    if (f.x > f.lastX + 1) {
-      emojiEl.style.transform = "scaleX(-1)";
-    } else if (f.x < f.lastX - 1) {
-      emojiEl.style.transform = "scaleX(1)";
-    }
+    if (f.x>f.lastX+1) emojiEl.style.transform = "scaleX(-1)";
+    else if (f.x<f.lastX-1) emojiEl.style.transform = "scaleX(1)";
   }
 
-  el.style.transition =
-    `left ${durationSec}s ease-in-out, top ${durationSec}s ease-in-out`;
+  el.style.transition = `left ${durationSec}s ease-in-out, top ${durationSec}s ease-in-out`;
+  el.style.left = f.x+"px";
+  el.style.top = f.y+"px";
 
-  el.style.left = f.x + "px";
-  el.style.top = f.y + "px";
-
-  if (durationSec >= 2) saveGame();
+  if (durationSec>=2) saveGame();
 }
 
 function startIndividualRoaming(f) {
   function step() {
-    if (!fish.some(item => item.id === f.id)) return;
+    if (!fish.some(item=>item.id===f.id)) return;
 
     if (foodBusy) {
-      setTimeout(step, 1000);
+      setTimeout(step,1000);
       return;
     }
 
     const area = $("tankFish");
-    const maxX = Math.max(0, area.clientWidth - 65);
-    const maxY = Math.max(0, area.clientHeight - 48);
+    const maxX = Math.max(0,area.clientWidth-65);
+    const maxY = Math.max(0,area.clientHeight-48);
 
-    const targetX = Math.random() * maxX;
-    const targetY = Math.random() * maxY;
-    const duration = 7 + Math.random() * 5;
+    const targetX = Math.random()*maxX;
+    const targetY = Math.random()*maxY;
+    const duration = 7+Math.random()*5;
 
-    moveFish(f, targetX, targetY, duration);
-
-    setTimeout(step, duration * 1000);
+    moveFish(f,targetX,targetY,duration);
+    setTimeout(step,duration*1000);
   }
 
-  setTimeout(step, Math.random() * 1500);
+  setTimeout(step,Math.random()*1500);
 }
 
 async function feed() {
@@ -1086,7 +1010,7 @@ async function feed() {
   const feedingFish = [...fish];
   const fedNames = [];
 
-  if (feedingFish.every(f => f.fullness >= 100)) {
+  if (feedingFish.every(f=>f.fullness>=100)) {
     say("모든 친구가 배불러! 조금 쉬게 해 주자. 💗");
     return;
   }
@@ -1096,32 +1020,28 @@ async function feed() {
 
   try {
     for (const originalFish of feedingFish) {
-      const f = fish.find(item => item.id === originalFish.id);
-      if (!f || f.fullness >= 100) continue;
+      const f = fish.find(item=>item.id===originalFish.id);
+      if (!f||f.fullness>=100) continue;
 
       const eaten = await dropFoodForFish(f);
 
-      if (eaten && fish.some(item => item.id === f.id)) {
-        f.fullness = Math.min(100, f.fullness + 15);
+      if (eaten&&fish.some(item=>item.id===f.id)) {
+        f.fullness = Math.min(100,f.fullness+15);
         f.mood = "냠냠! 맛있게 먹었어요! 💗";
         fedNames.push(f.name);
 
-        pollutionLevel = Math.min(100, pollutionLevel + 8);
+        pollutionLevel = Math.min(100,pollutionLevel+8);
         updateWaterStatus();
 
-        if (f.id === selectedId) renderCare();
-
+        if (f.id===selectedId) renderCare();
         renderList();
         effect("💗");
         saveGame();
       }
     }
 
-    if (fedNames.length) {
-      say(fedNames.join(", ") + "가 맛있게 먹었어! 🍚");
-    } else {
-      say("먹이를 줄 친구가 없어!");
-    }
+    if (fedNames.length) say(fedNames.join(", ")+"가 맛있게 먹었어! 🍚");
+    else say("먹이를 줄 친구가 없어!");
 
   } finally {
     if (foodTimer) clearInterval(foodTimer);
@@ -1138,24 +1058,22 @@ async function feed() {
 }
 
 function dropFoodForFish(f) {
-  return new Promise(resolve => {
+  return new Promise(resolve=>{
     const area = $("tankFish");
     const food = document.createElement("div");
     food.className = "food-pellet";
 
-    const maxX = Math.max(20, area.clientWidth - 24);
-    const foodX = 12 + Math.random() * Math.max(1, maxX - 12);
+    const maxX = Math.max(20,area.clientWidth-24);
+    const foodX = 12+Math.random()*Math.max(1,maxX-12);
 
-    food.style.left = foodX + "px";
+    food.style.left = foodX+"px";
     food.style.top = "0px";
     area.appendChild(food);
     activeFood = food;
 
-    $("feedingHint").textContent =
-      "🍚 " + f.name + "가 먹이를 향해 헤엄치는 중!";
-
+    $("feedingHint").textContent = "🍚 "+f.name+"가 먹이를 향해 헤엄치는 중!";
     f.mood = "맛있는 먹이를 발견했어요! 🍚";
-    if (f.id === selectedId) renderCare();
+    if (f.id===selectedId) renderCare();
 
     let foodY = 0;
     let finished = false;
@@ -1165,7 +1083,6 @@ function dropFoodForFish(f) {
       finished = true;
 
       if (foodTimer) clearInterval(foodTimer);
-
       foodTimer = null;
       food.remove();
       activeFood = null;
@@ -1178,42 +1095,38 @@ function dropFoodForFish(f) {
         return;
       }
 
-      const currentFish = fish.find(item => item.id === f.id);
-
+      const currentFish = fish.find(item=>item.id===f.id);
       if (!currentFish) {
         finish(false);
         return;
       }
 
       foodY += 0.8;
-      food.style.top = foodY + "px";
+      food.style.top = foodY+"px";
 
-      moveFish(currentFish, foodX - 22, foodY - 18, 1.2);
+      moveFish(currentFish,foodX-22,foodY-18,1.2);
 
-      const fishCenterX = currentFish.x + 32;
-      const fishCenterY = currentFish.y + 18;
+      const fishCenterX = currentFish.x+32;
+      const fishCenterY = currentFish.y+18;
 
       if (
-        Math.abs(fishCenterX - (foodX + 9)) < 34 &&
-        Math.abs(fishCenterY - (foodY + 9)) < 30
+        Math.abs(fishCenterX-(foodX+9))<34 &&
+        Math.abs(fishCenterY-(foodY+9))<30
       ) {
         finish(true);
         return;
       }
 
-      if (foodY >= area.clientHeight - 20) {
-        finish(true);
-      }
+      if (foodY>=area.clientHeight-20) finish(true);
     }
 
-    foodTimer = setInterval(dropStep, 80);
+    foodTimer = setInterval(dropStep,80);
   });
 }
 
 /* 놀아주기: 광어 특별 점프 */
 function play() {
   playBubbleSound();
-
   const f = selectedFish();
 
   if (!f) {
@@ -1221,26 +1134,22 @@ function play() {
     return;
   }
 
-  if (f.species === "광어") {
+  if (f.species==="광어") {
     f.mood = "물 만났어요! 🫧";
-
     renderCare();
     saveGame();
-
     say("물 만났어요!");
 
-    const swimmer = document.querySelector(
-      '[data-fish-id="' + f.id + '"]'
-    );
+    const swimmer = document.querySelector('[data-fish-id="'+f.id+'"]');
 
     if (swimmer) {
       swimmer.classList.remove("flatfish-jump");
       void swimmer.offsetWidth;
       swimmer.classList.add("flatfish-jump");
 
-      swimmer.addEventListener("animationend", () => {
+      swimmer.addEventListener("animationend",()=>{
         swimmer.classList.remove("flatfish-jump");
-      }, { once: true });
+      },{once:true});
     }
 
     effect("💦");
@@ -1248,29 +1157,26 @@ function play() {
   }
 
   f.mood = "함께 놀아서 행복해요! 🥰";
-
   const area = $("tankFish");
 
   moveFish(
     f,
-    Math.random() * Math.max(0, area.clientWidth - 65),
-    Math.random() * Math.max(0, area.clientHeight - 48),
+    Math.random()*Math.max(0,area.clientWidth-65),
+    Math.random()*Math.max(0,area.clientHeight-48),
     2.5
   );
 
   renderCare();
   saveGame();
-
-  say(f.name + "가 기분 좋게 헤엄쳤어! 🪁");
+  say(f.name+"가 기분 좋게 헤엄쳤어! 🪁");
   effect("💗");
 
-  setTimeout(() => effect("✨"), 250);
-  setTimeout(() => effect("🫧"), 500);
+  setTimeout(()=>effect("✨"),250);
+  setTimeout(()=>effect("🫧"),500);
 }
 
 function petFish() {
   playHeartSound();
-
   const f = selectedFish();
 
   if (!f) {
@@ -1279,26 +1185,24 @@ function petFish() {
   }
 
   f.mood = "사랑받아서 행복해요! 💗";
-
   renderCare();
   saveGame();
-
-  say(f.name + "가 반가워하는 것 같아!");
+  say(f.name+"가 반가워하는 것 같아!");
   effect("💕");
 }
 
 function updateWaterStatus() {
   const tankEl = $("tank");
-  tankEl.classList.remove("dirty-1", "dirty-2", "dirty-3");
+  tankEl.classList.remove("dirty-1","dirty-2","dirty-3");
 
-  if (pollutionLevel < 30) {
+  if (pollutionLevel<30) {
     waterClean = true;
     $("waterStatus").textContent = "💧 물이 깨끗해요! 반짝반짝 ✨";
-  } else if (pollutionLevel < 60) {
+  } else if (pollutionLevel<60) {
     waterClean = false;
     tankEl.classList.add("dirty-1");
     $("waterStatus").textContent = "💧 약간 탁해졌어요. 물갈이를 생각해보세요.";
-  } else if (pollutionLevel < 90) {
+  } else if (pollutionLevel<90) {
     waterClean = false;
     tankEl.classList.add("dirty-2");
     $("waterStatus").textContent = "💧 물이 많이 더러워졌어요! 🪨";
@@ -1314,27 +1218,24 @@ function updateWaterStatus() {
 function cleanTank() {
   playCleanSound();
   pollutionLevel = 0;
-
   updateWaterStatus();
   saveGame();
-
   say("어항 물갈이 완료! 반짝반짝 맑아졌어! 🫧✨");
   effect("✨");
 }
 
-setInterval(() => {
-  if (pollutionLevel < 100) {
-    pollutionLevel = Math.min(100, pollutionLevel + 2);
+setInterval(()=>{
+  if (pollutionLevel<100) {
+    pollutionLevel = Math.min(100,pollutionLevel+2);
     updateWaterStatus();
   }
-}, 45000);
+},45000);
 
 function toggleZenMode(e) {
   if (e) e.stopPropagation();
 
   playClickSound();
   isZen = !isZen;
-
   const tank = $("tank");
 
   if (isZen) {
@@ -1348,7 +1249,7 @@ function toggleZenMode(e) {
 
 function handleTankClick(e) {
   if (
-    e.target.tagName === "BUTTON" ||
+    e.target.tagName==="BUTTON" ||
     e.target.closest("button") ||
     e.target.closest(".swimmer")
   ) return;
@@ -1356,28 +1257,27 @@ function handleTankClick(e) {
   if (!isZen) toggleZenMode();
 }
 
-window.addEventListener("keydown", e => {
-  if (e.key === "Escape" && isZen) toggleZenMode();
+window.addEventListener("keydown",e=>{
+  if (e.key==="Escape"&&isZen) toggleZenMode();
 });
 
 function decorate(item) {
   playClickSound();
 
-  if (decorations.length >= 30) {
+  if (decorations.length>=30) {
     say("장식이 가득해! 먼저 장식을 비워 줘.");
     return;
   }
 
   decorations.push(item);
   renderDecor();
-  say("어항에 " + item + " 장식을 추가했어!");
+  say("어항에 "+item+" 장식을 추가했어!");
   saveGame();
 }
 
 function resetDecor() {
   playClickSound();
   decorations = [];
-
   renderDecor();
   say("어항 장식을 비웠어. 새롭게 꾸며 보자!");
   saveGame();
@@ -1395,39 +1295,37 @@ function effect(symbol) {
 
   el.className = "effect";
   el.textContent = symbol;
-  el.style.left = (20 + Math.random() * 60) + "%";
-  el.style.top = (30 + Math.random() * 30) + "%";
+  el.style.left = (20+Math.random()*60)+"%";
+  el.style.top = (30+Math.random()*30)+"%";
 
   tank.appendChild(el);
-  setTimeout(() => el.remove(), 1400);
+  setTimeout(()=>el.remove(),1400);
 }
 
+/* 어항 속 물고기 표시 */
 function renderTankFish() {
   const area = $("tankFish");
   area.replaceChildren();
 
   if (!fish.length) {
     const empty = document.createElement("div");
-
-    empty.style.cssText =
-      "text-align:center;padding-top:65px;color:#5f9aac;font-size:13px";
-
+    empty.style.cssText = "text-align:center;padding-top:65px;color:#5f9aac;font-size:13px";
     empty.textContent = "새 친구들이 오기를 기다리는 중 🫧";
     area.appendChild(empty);
     return;
   }
 
-  fish.forEach(f => {
+  fish.forEach(f=>{
     const item = document.createElement("div");
 
     item.className = "swimmer";
     item.dataset.fishId = f.id;
-    item.setAttribute("role", "button");
-    item.setAttribute("tabindex", "0");
-    item.setAttribute("aria-label", f.name + " 선택");
+    item.setAttribute("role","button");
+    item.setAttribute("tabindex","0");
+    item.setAttribute("aria-label",f.name+" 선택");
 
-    item.style.left = f.x + "px";
-    item.style.top = f.y + "px";
+    item.style.left = f.x+"px";
+    item.style.top = f.y+"px";
 
     const emoji = document.createElement("span");
     emoji.className = "fish-emoji";
@@ -1437,25 +1335,26 @@ function renderTankFish() {
     name.className = "swim-name";
     name.textContent = f.name;
 
-    item.appendChild(emoji);
-
+    /* 사진이 있으면 이모티콘을 만들지 않고 사진만 표시 */
     if (f.photo) {
       const photo = document.createElement("img");
       photo.className = "fish-face-photo";
       photo.src = f.photo;
-      photo.alt = f.name + "의 얼굴 사진";
+      photo.alt = f.name+"의 얼굴 사진";
       item.appendChild(photo);
+    } else {
+      item.appendChild(emoji);
     }
 
     item.appendChild(name);
 
-    item.addEventListener("click", e => {
+    item.addEventListener("click",e=>{
       e.stopPropagation();
       selectFish(f.id);
     });
 
-    item.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
+    item.addEventListener("keydown",e=>{
+      if (e.key==="Enter"||e.key===" ") {
         e.preventDefault();
         selectFish(f.id);
       }
@@ -1470,19 +1369,15 @@ function renderList() {
 
   if (!fish.length) {
     const empty = document.createElement("p");
-
     empty.className = "small";
     empty.textContent = "아직 물고기가 없어. 첫 친구를 추가해 봐!";
-
     $("fishList").appendChild(empty);
     return;
   }
 
-  fish.forEach(f => {
+  fish.forEach(f=>{
     const card = document.createElement("div");
-
-    card.className = "fish-card" +
-      (f.id === selectedId ? " active" : "");
+    card.className = "fish-card"+(f.id===selectedId?" active":"");
 
     const emoji = document.createElement("div");
     emoji.className = "emoji";
@@ -1501,25 +1396,23 @@ function renderList() {
 
     const fill = document.createElement("div");
     fill.className = "fill";
-    fill.style.width = f.fullness + "%";
-
+    fill.style.width = f.fullness+"%";
     bar.appendChild(fill);
 
     const choose = document.createElement("button");
     choose.className = "blue";
-    choose.textContent = f.id === selectedId ? "선택 중" : "돌보기";
-    choose.onclick = () => selectFish(f.id);
+    choose.textContent = f.id===selectedId?"선택 중":"돌보기";
+    choose.onclick = ()=>selectFish(f.id);
 
     const remove = document.createElement("button");
     remove.className = "danger";
     remove.textContent = "삭제";
-
-    remove.onclick = () => {
+    remove.onclick = ()=>{
       selectedId = f.id;
       removeFish();
     };
 
-    card.append(emoji, name, species, bar, choose, remove);
+    card.append(emoji,name,species,bar,choose,remove);
     $("fishList").appendChild(card);
   });
 }
@@ -1533,10 +1426,10 @@ function renderCare() {
     return;
   }
 
-  $("selectedName").textContent = f.emoji + " " + f.name;
-  $("selectedInfo").textContent = f.species + " · 나의 소중한 친구";
-  $("fullnessText").textContent = f.fullness + " / 100";
-  $("fullnessBar").style.width = f.fullness + "%";
+  $("selectedName").textContent = f.emoji+" "+f.name;
+  $("selectedInfo").textContent = f.species+" · 나의 소중한 친구";
+  $("fullnessText").textContent = f.fullness+" / 100";
+  $("fullnessBar").style.width = f.fullness+"%";
   $("mood").textContent = f.mood;
 
   $("photoStatus").textContent = f.photo
@@ -1555,12 +1448,12 @@ function render() {
 loadGame();
 render();
 
-fish.forEach(f => startIndividualRoaming(f));
+fish.forEach(f=>startIndividualRoaming(f));
 
-window.addEventListener("pagehide", saveGame);
+window.addEventListener("pagehide",saveGame);
 
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") saveGame();
+document.addEventListener("visibilitychange",()=>{
+  if (document.visibilityState==="hidden") saveGame();
 });
 </script>
 </body>
