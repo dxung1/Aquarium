@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -225,7 +226,7 @@ text-shadow: 0 1px 3px #ffffffb0;
 pointer-events: none;
 }
 
-/* 얼굴 사진 위치 수정 */
+/* 기본 물고기(🐟) 얼굴 사진 위치 */
 .fish-face-photo {
 position: absolute;
 left: 30px;
@@ -240,9 +241,24 @@ z-index: 3;
 pointer-events: none;
 }
 
-/* 물고기가 반대 방향을 볼 때 사진 위치 변경 */
+/* 🐟가 오른쪽을 볼 때 */
 .swimmer.facing-right .fish-face-photo {
 left: 11px;
+}
+
+/*
+🐠는 기본 얼굴 방향이 🐟와 반대인 경우를 고려해
+사진 위치를 반대로 적용
+*/
+
+/* 🐠가 기본 방향을 볼 때 */
+.swimmer.opposite-face:not(.facing-right) .fish-face-photo {
+left: 11px;
+}
+
+/* 🐠가 반대 방향으로 움직일 때 */
+.swimmer.opposite-face.facing-right .fish-face-photo {
+left: 30px;
 }
 
 @keyframes wiggle {
@@ -774,10 +790,13 @@ async function uploadFishPhoto(event) {
   input.value = "";
 }
 
-/* 이모티콘은 유지하고 사진만 추가 */
+/* 사진 표시 업데이트 */
 function updateFishFace(f) {
   const swimmer = document.querySelector('[data-fish-id="'+f.id+'"]');
   if (!swimmer) return;
+
+  /* 🐠는 🐟와 사진 위치를 반대로 적용 */
+  swimmer.classList.toggle("opposite-face",f.emoji==="🐠");
 
   const oldPhoto = swimmer.querySelector(".fish-face-photo");
   if (oldPhoto) oldPhoto.remove();
@@ -1324,6 +1343,12 @@ function renderTankFish() {
     const item = document.createElement("div");
 
     item.className = "swimmer";
+
+    /* 🐠는 🐟와 얼굴 방향이 반대이므로 별도 클래스 적용 */
+    if (f.emoji==="🐠") {
+      item.classList.add("opposite-face");
+    }
+
     item.dataset.fishId = f.id;
     item.setAttribute("role","button");
     item.setAttribute("tabindex","0");
@@ -1340,7 +1365,6 @@ function renderTankFish() {
     name.className = "swim-name";
     name.textContent = f.name;
 
-    /* 이모티콘은 항상 표시하고 사진은 얼굴 위에 겹치기 */
     item.appendChild(emoji);
 
     if (f.photo) {
