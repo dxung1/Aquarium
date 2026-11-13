@@ -226,7 +226,6 @@ text-shadow: 0 1px 3px #ffffffb0;
 pointer-events: none;
 }
 
-/* 기본 물고기(🐟) 얼굴 사진 위치 */
 .fish-face-photo {
 position: absolute;
 left: 30px;
@@ -241,22 +240,14 @@ z-index: 3;
 pointer-events: none;
 }
 
-/* 🐟가 오른쪽을 볼 때 */
 .swimmer.facing-right .fish-face-photo {
 left: 11px;
 }
 
-/*
-🐠는 기본 얼굴 방향이 🐟와 반대인 경우를 고려해
-사진 위치를 반대로 적용
-*/
-
-/* 🐠가 기본 방향을 볼 때 */
 .swimmer.opposite-face:not(.facing-right) .fish-face-photo {
 left: 11px;
 }
 
-/* 🐠가 반대 방향으로 움직일 때 */
 .swimmer.opposite-face.facing-right .fish-face-photo {
 left: 30px;
 }
@@ -443,6 +434,43 @@ to { opacity: 0; transform: translateY(-60px) scale(1.15); }
 <div id="feedingHint"></div>
 </section>
 
+<!-- 1. 친구 돌보기 -->
+<section class="card">
+<h2>💗 친구 돌보기</h2>
+<div id="selectedName">먼저 물고기를 추가해 줘!</div>
+
+<div id="carePanel" hidden>
+<p id="selectedInfo" class="small"></p>
+<label>🍚 포만도</label>
+<div id="fullnessText">55 / 100</div>
+<div class="bar"><div id="fullnessBar" class="fill"></div></div>
+<div id="mood" class="message">오늘도 행복한 하루!</div>
+
+<div class="message" style="margin-top:12px;">
+<strong>📷 나만의 얼굴 사진</strong>
+<p class="small">원하는 사진을 골라 친구의 얼굴에 넣어 줘!</p>
+<button class="blue" style="width:100%;" onclick="document.getElementById('fishPhotoInput').click()">
+📷 사진 업로드하기
+</button>
+<input type="file" id="fishPhotoInput" accept="image/jpeg,image/png,image/webp,image/*" hidden onchange="uploadFishPhoto(event)">
+<p id="photoStatus" class="small">아직 등록된 사진이 없어!</p>
+<button class="danger" style="width:100%;" onclick="removeFishPhoto()">사진 삭제하기</button>
+</div>
+
+<div class="actions">
+<button class="green" onclick="renameFish()">✏️ 이름 바꾸기</button>
+<button class="danger" onclick="removeFish()">🗑️ 삭제하기</button>
+</div>
+</div>
+</section>
+
+<!-- 2. 우리 집 물고기 -->
+<section class="card">
+<h2>🫧 우리 집 물고기</h2>
+<div id="fishList" class="fish-list"></div>
+</section>
+
+<!-- 3. 새 친구 데려오기 -->
 <section class="card">
 <h2>🐟 새 친구 데려오기</h2>
 <label for="species">물고기 종류</label>
@@ -480,40 +508,6 @@ to { opacity: 0; transform: translateY(-60px) scale(1.15); }
 <button onclick="addFish()">추가하기</button>
 </div>
 <p class="small">최대 20마리까지 키울 수 있어!</p>
-</section>
-
-<section class="card">
-<h2>🫧 우리 집 물고기</h2>
-<div id="fishList" class="fish-list"></div>
-</section>
-
-<section class="card">
-<h2>💗 친구 돌보기</h2>
-<div id="selectedName">먼저 물고기를 추가해 줘!</div>
-
-<div id="carePanel" hidden>
-<p id="selectedInfo" class="small"></p>
-<label>🍚 포만도</label>
-<div id="fullnessText">55 / 100</div>
-<div class="bar"><div id="fullnessBar" class="fill"></div></div>
-<div id="mood" class="message">오늘도 행복한 하루!</div>
-
-<div class="message" style="margin-top:12px;">
-<strong>📷 나만의 얼굴 사진</strong>
-<p class="small">원하는 사진을 골라 친구의 얼굴에 넣어 줘!</p>
-<button class="blue" style="width:100%;" onclick="document.getElementById('fishPhotoInput').click()">
-📷 사진 업로드하기
-</button>
-<input type="file" id="fishPhotoInput" accept="image/jpeg,image/png,image/webp,image/*" hidden onchange="uploadFishPhoto(event)">
-<p id="photoStatus" class="small">아직 등록된 사진이 없어!</p>
-<button class="danger" style="width:100%;" onclick="removeFishPhoto()">사진 삭제하기</button>
-</div>
-
-<div class="actions">
-<button class="green" onclick="renameFish()">✏️ 이름 바꾸기</button>
-<button class="danger" onclick="removeFish()">🗑️ 삭제하기</button>
-</div>
-</div>
 </section>
 
 <section class="card">
@@ -795,7 +789,6 @@ function updateFishFace(f) {
   const swimmer = document.querySelector('[data-fish-id="'+f.id+'"]');
   if (!swimmer) return;
 
-  /* 🐠는 🐟와 사진 위치를 반대로 적용 */
   swimmer.classList.toggle("opposite-face",f.emoji==="🐠");
 
   const oldPhoto = swimmer.querySelector(".fish-face-photo");
@@ -1344,7 +1337,6 @@ function renderTankFish() {
 
     item.className = "swimmer";
 
-    /* 🐠는 🐟와 얼굴 방향이 반대이므로 별도 클래스 적용 */
     if (f.emoji==="🐠") {
       item.classList.add("opposite-face");
     }
